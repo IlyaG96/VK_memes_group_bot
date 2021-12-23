@@ -2,3 +2,4 @@ photos
 env
 .idea
 __pycache__
+.env

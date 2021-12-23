@@ -1,7 +1,11 @@
+from dotenv import load_dotenv
 import requests
 import pathlib
+import os
 
-photo_path = "/Users/ilyagabdrakhmanov/PycharmProjects/VK_memes_group_bot/photos"
+load_dotenv()
+photo_path = os.getenv("PHOTO_PATH")
+
 
 def download_comic(photo_path):
     url = "https://xkcd.com/info.0.json"
@@ -15,9 +19,7 @@ def download_comic(photo_path):
     photo_resp = requests.get(photo_link)
     pathlib.Path(photo_path).mkdir(parents=True, exist_ok=True)
 
-
     with open(f"{photo_path}/photo.png", mode="wb") as file:
-
         file.write(photo_resp.content)
 
 
