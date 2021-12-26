@@ -103,10 +103,14 @@ def post_photo(vk_token, user_id, group_id, vk_api_version, photo_path, upload_u
 
     return response.json()
 
+
 def remove_comic(photo_path):
-    pass
+    file_to_rem = pathlib.Path(f"{photo_path}/photo.png")
+    file_to_rem.unlink()
+
+
 def main():
-    # environment vars
+
     load_dotenv()
     photo_path = os.getenv("PHOTO_PATH")
     group_id = os.getenv("VK_GROUP_ID")
@@ -114,7 +118,6 @@ def main():
     vk_token = os.getenv("VK_TOKEN")
     vk_api_version = os.getenv("VK_API_VERSION")
 
-    # information from xkcd
     total_comics = get_xkcd_response()["num"]
     comic_description = save_comic(photo_path, total_comics)
     photo_title = comic_description["safe_title"]
@@ -124,4 +127,6 @@ def main():
     post_photo(vk_token, user_id, group_id, vk_api_version, photo_path, upload_url, photo_description, photo_title)
     remove_comic(photo_path)
 
-main()
+
+if __name__ == '__main__':
+    main()
