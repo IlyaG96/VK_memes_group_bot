@@ -28,10 +28,11 @@ VK_USER_ID="your_user_id"
 VK_GROUP_ID="your_group_id"
 VK_API_VERSION="5.131"
 ```
-`APP_ID` - Создайте приложение ВК [здесь](https://dev.vk.com)
+- Создайте приложение ВК [здесь](https://dev.vk.com)
 
-- В качестве типа приложения следует указать standalone — это подходящий тип для приложений, которые просто запускаются на компьютере.
+- - В качестве типа приложения следует указать standalone — это подходящий тип для приложений, которые просто запускаются на компьютере.  
 
+`APP_ID` - id Вашего приложения ВК  
 `VK_TOKEN` - получать [тут](https://dev.vk.com/api/access-token/implicit-flow-user)  
 `VK_USER_ID` - ваш user_id (vk.com/user_id)  
 `VK_GROUP_ID` - id группы вк (vk.com/public<group_id>) при переходе в группу  
