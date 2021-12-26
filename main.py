@@ -1,23 +1,32 @@
 from dotenv import load_dotenv
+from random import randint
 import requests
 import pathlib
 import os
 
 
 def get_xkcd_response():
+
     url = "https://xkcd.com/info.0.json"
     response = requests.get(url)
     response.raise_for_status()
     return response.json()
 
 
-def save_comic(photo_path, photo_link):
+def save_comic(photo_path, total_comics):
 
+    comic_number = randint(1, total_comics)
+    url = f"https://xkcd.com/{comic_number}/info.0.json"
+    response = requests.get(url)
+
+    photo_link = response.json()["img"]
     photo = requests.get(photo_link)
     pathlib.Path(photo_path).mkdir(parents=True, exist_ok=True)
 
     with open(f"{photo_path}/photo.png", mode="wb") as file:
         file.write(photo.content)
+
+    return response.json()
 
 
 def get_vk_response(vk_token, group_id, vk_api_version):
@@ -34,8 +43,7 @@ def get_vk_response(vk_token, group_id, vk_api_version):
     return response.json()
 
 
-def send_photo(photo_path, upload_url):
-    print(1)
+def send_to_server(photo_path, upload_url):
 
     with open(f"{photo_path}/photo.png", "rb") as file:
         files = {
@@ -47,7 +55,13 @@ def send_photo(photo_path, upload_url):
     return response.json()
 
 
-def save_photo(vk_token, user_id, group_id, vk_api_version, vk_hash, photo, server):
+def save_on_server(photo_path, upload_url, vk_token, user_id, group_id, vk_api_version):
+
+    downloaded_photo_params = send_to_server(photo_path, upload_url)
+
+    vk_hash = downloaded_photo_params["hash"]
+    photo = downloaded_photo_params["photo"]
+    server = downloaded_photo_params["server"]
 
     payload = {
         "access_token": vk_token,
@@ -61,30 +75,37 @@ def save_photo(vk_token, user_id, group_id, vk_api_version, vk_hash, photo, serv
     url = "https://api.vk.com/method/photos.saveWallPhoto"
     response = requests.post(url, params=payload)
     response.raise_for_status()
-    answer = response.json()
 
-    return answer
+    return response.json()
 
 
-def post_photo(vk_token, user_id, group_id, vk_hash):
+def post_photo(vk_token, user_id, group_id, vk_api_version, photo_path, upload_url, photo_description, photo_title):
+
+    server_response = save_on_server(photo_path, upload_url, vk_token, user_id, group_id, vk_api_version)
+
+    message = f"{photo_title}\n\n" \
+              f"{photo_description}\n\n" \
+              f"by https://xkcd.com"
+
+    for answer in server_response["response"]:
+        media_id = answer["id"]
 
     payload = {
         "access_token": vk_token,
-        "user_id": user_id,
-        "group_id": group_id,
-        "hash": vk_hash,
-        "v": "5.131",
+        "owner_id": -int(group_id),
+        "v": vk_api_version,
+        "attachments": f"photo{user_id}_{media_id}",
+        "message": message
     }
     url = "https://api.vk.com/method/wall.post"
     response = requests.post(url, params=payload)
     response.raise_for_status()
-    answer = response.json()
 
-    return answer
+    return response.json()
 
-
+def remove_comic(photo_path):
+    pass
 def main():
-
     # environment vars
     load_dotenv()
     photo_path = os.getenv("PHOTO_PATH")
@@ -94,20 +115,13 @@ def main():
     vk_api_version = os.getenv("VK_API_VERSION")
 
     # information from xkcd
-    xkcd_response = get_xkcd_response()
-    photo_link = xkcd_response["img"]
-    photo_title = xkcd_response["safe_title"]
-    photo_description = xkcd_response["alt"]
+    total_comics = get_xkcd_response()["num"]
+    comic_description = save_comic(photo_path, total_comics)
+    photo_title = comic_description["safe_title"]
+    photo_description = comic_description["alt"]
 
     upload_url = get_vk_response(vk_token, group_id, vk_api_version)["response"]["upload_url"]
-    downloaded_photo_params = send_photo(photo_path, upload_url)
-    vk_hash = downloaded_photo_params["hash"]
-    photo = downloaded_photo_params["photo"]
-    server = downloaded_photo_params["server"]
-
-    save_photo(vk_token, user_id, group_id, vk_api_version, vk_hash, photo, server)
-
+    post_photo(vk_token, user_id, group_id, vk_api_version, photo_path, upload_url, photo_description, photo_title)
+    remove_comic(photo_path)
 
 main()
-
-
