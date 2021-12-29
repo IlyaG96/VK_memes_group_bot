@@ -5,28 +5,32 @@ import pathlib
 import os
 
 
-def get_xkcd_response():
+def count_xkcd_comics():
 
     url = "https://xkcd.com/info.0.json"
     response = requests.get(url)
     response.raise_for_status()
-    return response.json()
+
+    total_comics = response.json()["num"]
+
+    return total_comics
 
 
-def save_comic(photo_path, total_comics):
+def fetch_comic_description(total_comics):
 
     comic_number = randint(1, total_comics)
     url = f"https://xkcd.com/{comic_number}/info.0.json"
     response = requests.get(url)
 
-    photo_link = response.json()["img"]
+    return response.json()
+
+
+def download_comic(photo_path, photo_link):
     photo = requests.get(photo_link)
     pathlib.Path(photo_path).mkdir(parents=True, exist_ok=True)
 
     with open(f"{photo_path}/photo.png", mode="wb") as file:
         file.write(photo.content)
-
-    return response.json()
 
 
 def get_vk_response(vk_token, group_id, vk_api_version):
@@ -118,10 +122,13 @@ def main():
     vk_token = os.getenv("VK_TOKEN")
     vk_api_version = os.getenv("VK_API_VERSION")
 
-    total_comics = get_xkcd_response()["num"]
-    comic_description = save_comic(photo_path, total_comics)
+    total_comics = count_xkcd_comics()
+    comic_description = fetch_comic_description(total_comics)
     photo_title = comic_description["safe_title"]
     photo_description = comic_description["alt"]
+    photo_link = comic_description["img"]
+
+    download_comic(photo_path, photo_link)
 
     upload_url = get_vk_response(vk_token, group_id, vk_api_version)["response"]["upload_url"]
     post_photo(vk_token, user_id, group_id, vk_api_version, photo_path, upload_url, photo_description, photo_title)
