@@ -6,6 +6,20 @@ import pathlib
 import os
 
 
+class VkException(Exception):
+    pass
+
+
+def check_for_errors(response):
+
+    if response.get('error'):
+        error_code = response['error']['error_code']
+        error_msg = response['error']['error_msg']
+        msg = f"Ошибка! Код ошибки: '{error_code}', текст ошибки: '{error_msg}'"
+
+        raise VkException(msg)
+
+
 def count_xkcd_comics():
 
     url = "https://xkcd.com/info.0.json"
@@ -45,6 +59,7 @@ def get_vk_upload_url(vk_token, group_id, vk_api_version):
     url = "https://api.vk.com/method/photos.getWallUploadServer"
     response = requests.get(url, params=payload)
     response.raise_for_status()
+    check_for_errors(response.json())
 
     return response.json()
 
@@ -57,6 +72,7 @@ def send_to_server(path_to_photo, upload_url):
         }
         response = requests.post(url=upload_url, files=files)
         response.raise_for_status()
+        check_for_errors(response.json())
 
     return response.json()
 
@@ -81,6 +97,7 @@ def save_on_server(vk_token,
     url = "https://api.vk.com/method/photos.saveWallPhoto"
     response = requests.post(url, params=payload)
     response.raise_for_status()
+    check_for_errors(response.json())
 
     return response.json()
 
@@ -114,6 +131,7 @@ def post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id):
     url = "https://api.vk.com/method/wall.post"
     response = requests.post(url, params=payload)
     response.raise_for_status()
+    check_for_errors(response.json())
 
     return response.json()
 
@@ -127,7 +145,6 @@ def remove_comic(path_to_photo):
 def main():
 
     load_dotenv()
-
     photo_path = os.getenv("PHOTO_PATH", default="./photos")
     group_id = os.getenv("VK_GROUP_ID")
     vk_token = os.getenv("VK_TOKEN")
@@ -143,10 +160,12 @@ def main():
     file_name = os.path.basename(photo_link)
     path_to_photo = PurePath(photo_path, file_name)
     download_comic(photo_link, path_to_photo)
+
     try:
         vk_response = get_vk_upload_url(vk_token, group_id, vk_api_version)
         upload_url = vk_response["response"]["upload_url"]
         user_id = vk_response["response"]["user_id"]
+
         downloaded_photo_params = send_to_server(path_to_photo, upload_url)
         vk_hash = downloaded_photo_params["hash"]
         photo = downloaded_photo_params["photo"]
@@ -155,14 +174,14 @@ def main():
         server_response = save_on_server(vk_token, user_id, group_id, vk_api_version, vk_hash, photo, server)
         media_id = find_media_id(server_response)
         message = write_message(photo_title, photo_description)
+
         post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id)
 
-    except:
+    except requests.HTTPError:
         pass
 
     finally:
         remove_comic(path_to_photo)
-
 
 
 if __name__ == '__main__':
