@@ -137,34 +137,32 @@ def main():
 
     total_comics = count_xkcd_comics()
     comic_description = fetch_comic_description(total_comics)
-
     photo_title = comic_description["safe_title"]
     photo_description = comic_description["alt"]
     photo_link = comic_description["img"]
-
     file_name = os.path.basename(photo_link)
     path_to_photo = PurePath(photo_path, file_name)
-
     download_comic(photo_link, path_to_photo)
+    try:
+        vk_response = get_vk_upload_url(vk_token, group_id, vk_api_version)
+        upload_url = vk_response["response"]["upload_url"]
+        user_id = vk_response["response"]["user_id"]
+        downloaded_photo_params = send_to_server(path_to_photo, upload_url)
+        vk_hash = downloaded_photo_params["hash"]
+        photo = downloaded_photo_params["photo"]
+        server = downloaded_photo_params["server"]
 
-    vk_response = get_vk_upload_url(vk_token, group_id, vk_api_version)
+        server_response = save_on_server(vk_token, user_id, group_id, vk_api_version, vk_hash, photo, server)
+        media_id = find_media_id(server_response)
+        message = write_message(photo_title, photo_description)
+        post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id)
 
-    upload_url = vk_response["response"]["upload_url"]
-    user_id = vk_response["response"]["user_id"]
+    except:
+        pass
 
-    downloaded_photo_params = send_to_server(path_to_photo, upload_url)
+    finally:
+        remove_comic(path_to_photo)
 
-    vk_hash = downloaded_photo_params["hash"]
-    photo = downloaded_photo_params["photo"]
-    server = downloaded_photo_params["server"]
-
-    server_response = save_on_server(vk_token, user_id, group_id, vk_api_version, vk_hash, photo, server)
-    media_id = find_media_id(server_response)
-    message = write_message(photo_title, photo_description)
-
-    post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id)
-
-    remove_comic(path_to_photo)
 
 
 if __name__ == '__main__':
