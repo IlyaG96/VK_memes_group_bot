@@ -3,6 +3,7 @@ from random import randint
 import requests
 import pathlib
 import os
+from pathlib import PurePath
 
 
 def count_xkcd_comics():
@@ -21,16 +22,18 @@ def fetch_comic_description(total_comics):
     comic_number = randint(1, total_comics)
     url = f"https://xkcd.com/{comic_number}/info.0.json"
     response = requests.get(url)
+    response.raise_for_status()
 
     return response.json()
 
 
-def download_comic(photo_path, photo_link):
-    photo = requests.get(photo_link)
-    pathlib.Path(photo_path).mkdir(parents=True, exist_ok=True)
+def download_comic(photo_link, path_to_photo):
 
-    with open(f"{photo_path}/photo.png", mode="wb") as file:
-        file.write(photo.content)
+    response = requests.get(photo_link)
+    response.raise_for_status()
+
+    with open(path_to_photo, mode="wb") as file:
+        file.write(response.content)
 
 
 def get_vk_upload_url(vk_token, group_id, vk_api_version):
@@ -42,6 +45,7 @@ def get_vk_upload_url(vk_token, group_id, vk_api_version):
     }
     url = "https://api.vk.com/method/photos.getWallUploadServer"
     response = requests.get(url, params=payload)
+    response.raise_for_status()
 
     upload_url = response.json()["response"]["upload_url"]
 
@@ -60,7 +64,12 @@ def send_to_server(photo_path, upload_url):
     return response.json()
 
 
-def save_on_server(photo_path, upload_url, vk_token, user_id, group_id, vk_api_version):
+def save_on_server(photo_path,
+                   upload_url,
+                   vk_token,
+                   user_id,
+                   group_id,
+                   vk_api_version):
 
     downloaded_photo_params = send_to_server(photo_path, upload_url)
 
@@ -117,11 +126,14 @@ def remove_comic(photo_path):
 def main():
 
     load_dotenv()
-    photo_path = os.getenv("PHOTO_PATH")
+
+    photo_path = os.getenv("PHOTO_PATH", default="./photos")
     group_id = os.getenv("VK_GROUP_ID")
     user_id = os.getenv("VK_USER_ID")
     vk_token = os.getenv("VK_TOKEN")
-    vk_api_version = os.getenv("VK_API_VERSION")
+    vk_api_version = os.getenv("VK_API_VERSION", default=5.131)
+
+    pathlib.Path(photo_path).mkdir(parents=True, exist_ok=True)
 
     total_comics = count_xkcd_comics()
     comic_description = fetch_comic_description(total_comics)
@@ -129,7 +141,10 @@ def main():
     photo_description = comic_description["alt"]
     photo_link = comic_description["img"]
 
-    download_comic(photo_path, photo_link)
+    file_name = os.path.basename(photo_link)
+    path_to_photo = PurePath(photo_path, file_name)
+
+    download_comic(photo_link, path_to_photo)
 
     upload_url = get_vk_upload_url(vk_token, group_id, vk_api_version)
     post_photo(vk_token, user_id, group_id, vk_api_version, photo_path, upload_url, photo_description, photo_title)
