@@ -46,9 +46,7 @@ def get_vk_upload_url(vk_token, group_id, vk_api_version):
     response = requests.get(url, params=payload)
     response.raise_for_status()
 
-    upload_url = response.json()["response"]["upload_url"]
-
-    return upload_url
+    return response.json()
 
 
 def send_to_server(path_to_photo, upload_url):
@@ -132,7 +130,6 @@ def main():
 
     photo_path = os.getenv("PHOTO_PATH", default="./photos")
     group_id = os.getenv("VK_GROUP_ID")
-    user_id = os.getenv("VK_USER_ID")
     vk_token = os.getenv("VK_TOKEN")
     vk_api_version = os.getenv("VK_API_VERSION", default=5.131)
 
@@ -150,7 +147,10 @@ def main():
 
     download_comic(photo_link, path_to_photo)
 
-    upload_url = get_vk_upload_url(vk_token, group_id, vk_api_version)
+    vk_response = get_vk_upload_url(vk_token, group_id, vk_api_version)
+
+    upload_url = vk_response["response"]["upload_url"]
+    user_id = vk_response["response"]["user_id"]
 
     downloaded_photo_params = send_to_server(path_to_photo, upload_url)
 
