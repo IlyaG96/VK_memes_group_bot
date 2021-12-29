@@ -18,7 +18,7 @@ $ source env/bin/activate
 $ pip install -r requirements.txt
 ```
 ## Использование
-- Заполните прилагающийся .env.exapmle файл и переименуйте его в .env или иным образом задайте переменные среды
+- Заполните прилагающийся .env.example файл и переименуйте его в .env или иным образом задайте переменные среды.
 
 ```bash
 PHOTO_PATH="/full/path/to/photos"
@@ -32,13 +32,13 @@ VK_API_VERSION="5.131"
 
 - - В качестве типа приложения следует указать standalone — это подходящий тип для приложений, которые просто запускаются на компьютере.  
 
-`APP_ID` - id Вашего приложения ВК  
-`VK_TOKEN` - получать [тут](https://dev.vk.com/api/access-token/implicit-flow-user)  
-`VK_USER_ID` - ваш user_id (vk.com/user_id)  
-`VK_GROUP_ID` - id группы вк (vk.com/public<group_id>) при переходе в группу  
+`APP_ID` - id Вашего приложения ВК.  
+`VK_TOKEN` - получать [тут](https://dev.vk.com/api/access-token/implicit-flow-user).  
+`VK_USER_ID` - ваш user_id (vk.com/user_id).  
+`VK_GROUP_ID` - id группы вк (vk.com/public<group_id>) при переходе в группу.  
 `VK_API_VERSION` - версия API вк.
 
-- Затем создайте группу в [ВК](https://vk.com/groups), в которой планируете размещать картинки
+- Затем создайте группу в [ВК](https://vk.com/groups), в которой планируете размещать картинки.
 
 
 Простейший способ скачать случайный мемес с сайта и разместить его на стене в группе -
