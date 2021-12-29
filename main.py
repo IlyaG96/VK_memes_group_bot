@@ -33,7 +33,7 @@ def download_comic(photo_path, photo_link):
         file.write(photo.content)
 
 
-def get_vk_response(vk_token, group_id, vk_api_version):
+def get_vk_upload_url(vk_token, group_id, vk_api_version):
 
     payload = {
         "access_token": vk_token,
@@ -41,10 +41,11 @@ def get_vk_response(vk_token, group_id, vk_api_version):
         "group_id": group_id
     }
     url = "https://api.vk.com/method/photos.getWallUploadServer"
-
     response = requests.get(url, params=payload)
 
-    return response.json()
+    upload_url = response.json()["response"]["upload_url"]
+
+    return upload_url
 
 
 def send_to_server(photo_path, upload_url):
@@ -130,7 +131,7 @@ def main():
 
     download_comic(photo_path, photo_link)
 
-    upload_url = get_vk_response(vk_token, group_id, vk_api_version)["response"]["upload_url"]
+    upload_url = get_vk_upload_url(vk_token, group_id, vk_api_version)
     post_photo(vk_token, user_id, group_id, vk_api_version, photo_path, upload_url, photo_description, photo_title)
     remove_comic(photo_path)
 
