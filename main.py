@@ -1,9 +1,9 @@
 from dotenv import load_dotenv
+from pathlib import PurePath
 from random import randint
 import requests
 import pathlib
 import os
-from pathlib import PurePath
 
 
 def count_xkcd_comics():
@@ -118,8 +118,8 @@ def post_photo(vk_token, user_id, group_id, vk_api_version, photo_path, upload_u
     return response.json()
 
 
-def remove_comic(photo_path):
-    file_to_rem = pathlib.Path(f"{photo_path}/photo.png")
+def remove_comic(path_to_photo):
+    file_to_rem = pathlib.Path(path_to_photo)
     file_to_rem.unlink()
 
 
@@ -137,6 +137,7 @@ def main():
 
     total_comics = count_xkcd_comics()
     comic_description = fetch_comic_description(total_comics)
+
     photo_title = comic_description["safe_title"]
     photo_description = comic_description["alt"]
     photo_link = comic_description["img"]
@@ -148,7 +149,7 @@ def main():
 
     upload_url = get_vk_upload_url(vk_token, group_id, vk_api_version)
     post_photo(vk_token, user_id, group_id, vk_api_version, photo_path, upload_url, photo_description, photo_title)
-    remove_comic(photo_path)
+    remove_comic(path_to_photo)
 
 
 if __name__ == '__main__':
