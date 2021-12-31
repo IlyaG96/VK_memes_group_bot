@@ -20,23 +20,27 @@ def check_for_errors(response):
         raise VkException(msg)
 
 
-def count_xkcd_comics():
+def get_xkcd_last_comic_id():
 
     url = "https://xkcd.com/info.0.json"
     response = requests.get(url)
     response.raise_for_status()
-    total_comics = response.json()["num"]
+    last_comic_id = response.json()["num"]
 
-    return total_comics
+    return last_comic_id
 
 
-def fetch_comic_description(total_comics):
+def chose_random_number(last_comic_id):
+    comic_number = randint(1, last_comic_id)
 
-    comic_number = randint(1, total_comics)
+    return comic_number
+
+
+def fetch_comic_description(comic_number):
+
     url = f"https://xkcd.com/{comic_number}/info.0.json"
     response = requests.get(url)
     response.raise_for_status()
-
     answer = response.json()
 
     return answer
@@ -152,8 +156,9 @@ def main():
     vk_api_version = os.getenv("VK_API_VERSION", default=5.131)
     pathlib.Path(photo_path).mkdir(parents=True, exist_ok=True)
 
-    total_comics = count_xkcd_comics()
-    comic_description = fetch_comic_description(total_comics)
+    last_comic_id = get_xkcd_last_comic_id()
+    comic_number = chose_random_number(last_comic_id)
+    comic_description = fetch_comic_description(comic_number)
     photo_title = comic_description["safe_title"]
     photo_description = comic_description["alt"]
     photo_link = comic_description["img"]
