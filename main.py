@@ -112,16 +112,17 @@ def save_on_server(vk_token,
     return answer
 
 
-def write_message(photo_title, photo_description):
+def post_photo(vk_token,
+               user_id,
+               group_id,
+               vk_api_version,
+               media_id,
+               photo_title,
+               photo_description):
 
     message = f"{photo_title}\n\n" \
               f"{photo_description}\n\n" \
               f"by https://xkcd.com"
-
-    return message
-
-
-def post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id):
 
     payload = {
         "access_token": vk_token,
@@ -162,10 +163,16 @@ def post_comic_on_wall(vk_token,
                                      vk_hash,
                                      photo,
                                      server)
-    media_id = server_response["response"][0]["id"]
-    message = write_message(photo_title, photo_description)
 
-    post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id)
+    media_id = server_response["response"][0]["id"]
+
+    post_photo(vk_token,
+               user_id,
+               group_id,
+               vk_api_version,
+               media_id,
+               photo_title,
+               photo_description)
 
 
 def main():
