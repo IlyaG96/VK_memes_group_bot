@@ -33,7 +33,7 @@ VK_API_VERSION="5.131"
 
 `PHOTO_PATH` - путь до папки с фотографиями. По умолчанию `./photos`  
 `APP_ID` - id Вашего приложения ВК.    
-`VK_TOKEN` - получать [тут](https://dev.vk.com/api/access-token/implicit-flow-user).  
+`VK_TOKEN` - получать [тут](https://dev.vk.com/api/access-token/implicit-flow-user). Вам понадобятся следующие права доступа (scopes): photos, groups, wall, offline.  
 `VK_GROUP_ID` - id группы вк (vk.com/public<group_id>) при переходе в группу.  
 `VK_API_VERSION` - версия API вк. По умолчанию 5.131
 
