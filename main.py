@@ -1,9 +1,10 @@
 from dotenv import load_dotenv
 from random import randint
 from pathlib import Path
+from urllib.parse import urlparse
 import requests
-import pathlib
 import os
+import urllib
 
 
 class VkException(Exception):
@@ -44,6 +45,15 @@ def fetch_comic_description(comic_number):
     answer = response.json()
 
     return answer
+
+
+def get_filename_from_photo_link(photo_link):
+
+    t = urlparse(photo_link).path
+    z = urllib.parse.unquote(t)
+    file_name = os.path.split(z)[1]
+
+    return file_name
 
 
 def download_comic(photo_link, path_to_photo):
@@ -182,7 +192,7 @@ def main():
     group_id = os.getenv("VK_GROUP_ID")
     vk_token = os.getenv("VK_TOKEN")
     vk_api_version = os.getenv("VK_API_VERSION", default=5.131)
-    pathlib.Path(photo_path).mkdir(parents=True, exist_ok=True)
+    Path(photo_path).mkdir(parents=True, exist_ok=True)
 
     last_comic_id = get_xkcd_last_comic_id()
     comic_number = chose_random_number(last_comic_id)
@@ -190,7 +200,7 @@ def main():
     photo_title = comic_description["safe_title"]
     photo_description = comic_description["alt"]
     photo_link = comic_description["img"]
-    file_name = os.path.basename(photo_link)
+    file_name = get_filename_from_photo_link(photo_link)
     path_to_photo = Path(photo_path, file_name)
     download_comic(photo_link, path_to_photo)
 
