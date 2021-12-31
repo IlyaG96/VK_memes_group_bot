@@ -139,12 +139,33 @@ def post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id):
     return answer
 
 
-def download_random_comic():
-    pass
+def post_comic_on_wall(vk_token,
+                       group_id,
+                       vk_api_version,
+                       path_to_photo,
+                       photo_title,
+                       photo_description):
 
+    vk_response = get_vk_upload_url(vk_token, group_id, vk_api_version)
+    upload_url = vk_response["response"]["upload_url"]
+    user_id = vk_response["response"]["user_id"]
 
-def post_comic_on_wall():
-    pass
+    downloaded_photo_params = send_to_server(path_to_photo, upload_url)
+    vk_hash = downloaded_photo_params["hash"]
+    photo = downloaded_photo_params["photo"]
+    server = downloaded_photo_params["server"]
+
+    server_response = save_on_server(vk_token,
+                                     user_id,
+                                     group_id,
+                                     vk_api_version,
+                                     vk_hash,
+                                     photo,
+                                     server)
+    media_id = server_response["response"][0]["id"]
+    message = write_message(photo_title, photo_description)
+
+    post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id)
 
 
 def main():
@@ -167,21 +188,12 @@ def main():
     download_comic(photo_link, path_to_photo)
 
     try:
-        vk_response = get_vk_upload_url(vk_token, group_id, vk_api_version)
-        upload_url = vk_response["response"]["upload_url"]
-        user_id = vk_response["response"]["user_id"]
-
-        downloaded_photo_params = send_to_server(path_to_photo, upload_url)
-        vk_hash = downloaded_photo_params["hash"]
-        photo = downloaded_photo_params["photo"]
-        server = downloaded_photo_params["server"]
-
-        server_response = save_on_server(vk_token, user_id, group_id, vk_api_version, vk_hash, photo, server)
-        media_id = server_response["response"][0]["id"]
-        message = write_message(photo_title, photo_description)
-
-        post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id)
-
+        post_comic_on_wall(vk_token,
+                           group_id,
+                           vk_api_version,
+                           path_to_photo,
+                           photo_title,
+                           photo_description)
     finally:
         path_to_photo.unlink()
 
