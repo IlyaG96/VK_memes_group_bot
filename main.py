@@ -75,9 +75,9 @@ def send_to_server(path_to_photo, upload_url):
             "file1": file,
         }
         response = requests.post(url=upload_url, files=files)
-        response.raise_for_status()
-        answer = response.json()
-        check_for_errors(answer)
+    response.raise_for_status()
+    answer = response.json()
+    check_for_errors(answer)
 
     return answer
 
