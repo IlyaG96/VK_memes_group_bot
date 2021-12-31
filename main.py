@@ -37,7 +37,9 @@ def fetch_comic_description(total_comics):
     response = requests.get(url)
     response.raise_for_status()
 
-    return response.json()
+    answer = response.json()
+
+    return answer
 
 
 def download_comic(photo_link, path_to_photo):
@@ -59,9 +61,11 @@ def get_vk_upload_url(vk_token, group_id, vk_api_version):
     url = "https://api.vk.com/method/photos.getWallUploadServer"
     response = requests.get(url, params=payload)
     response.raise_for_status()
-    check_for_errors(response.json())
 
-    return response.json()
+    answer = response.json()
+    check_for_errors(answer)
+
+    return answer
 
 
 def send_to_server(path_to_photo, upload_url):
@@ -72,9 +76,10 @@ def send_to_server(path_to_photo, upload_url):
         }
         response = requests.post(url=upload_url, files=files)
         response.raise_for_status()
-        check_for_errors(response.json())
+        answer = response.json()
+        check_for_errors(answer)
 
-    return response.json()
+    return answer
 
 
 def save_on_server(vk_token,
@@ -97,9 +102,10 @@ def save_on_server(vk_token,
     url = "https://api.vk.com/method/photos.saveWallPhoto"
     response = requests.post(url, params=payload)
     response.raise_for_status()
-    check_for_errors(response.json())
+    answer = response.json()
+    check_for_errors(answer)
 
-    return response.json()
+    return answer
 
 
 def find_media_id(server_response):
@@ -131,9 +137,10 @@ def post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id):
     url = "https://api.vk.com/method/wall.post"
     response = requests.post(url, params=payload)
     response.raise_for_status()
-    check_for_errors(response.json())
+    answer = response.json()
+    check_for_errors(answer)
 
-    return response.json()
+    return answer
 
 
 def remove_comic(path_to_photo):
