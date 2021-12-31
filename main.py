@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
-from pathlib import PurePath
 from random import randint
+from pathlib import Path
 import requests
 import pathlib
 import os
@@ -108,14 +108,6 @@ def save_on_server(vk_token,
     return answer
 
 
-def find_media_id(server_response):
-
-    for answer in server_response["response"]:
-        media_id = answer["id"]
-
-    return media_id
-
-
 def write_message(photo_title, photo_description):
 
     message = f"{photo_title}\n\n" \
@@ -143,10 +135,12 @@ def post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id):
     return answer
 
 
-def remove_comic(path_to_photo):
+def download_random_comic():
+    pass
 
-    file_to_rem = pathlib.Path(path_to_photo)
-    file_to_rem.unlink()
+
+def post_comic_on_wall():
+    pass
 
 
 def main():
@@ -156,7 +150,6 @@ def main():
     group_id = os.getenv("VK_GROUP_ID")
     vk_token = os.getenv("VK_TOKEN")
     vk_api_version = os.getenv("VK_API_VERSION", default=5.131)
-
     pathlib.Path(photo_path).mkdir(parents=True, exist_ok=True)
 
     total_comics = count_xkcd_comics()
@@ -165,7 +158,7 @@ def main():
     photo_description = comic_description["alt"]
     photo_link = comic_description["img"]
     file_name = os.path.basename(photo_link)
-    path_to_photo = PurePath(photo_path, file_name)
+    path_to_photo = Path(photo_path, file_name)
     download_comic(photo_link, path_to_photo)
 
     try:
@@ -179,16 +172,13 @@ def main():
         server = downloaded_photo_params["server"]
 
         server_response = save_on_server(vk_token, user_id, group_id, vk_api_version, vk_hash, photo, server)
-        media_id = find_media_id(server_response)
+        media_id = server_response["response"][0]["id"]
         message = write_message(photo_title, photo_description)
 
         post_photo(vk_token, user_id, group_id, vk_api_version, message, media_id)
 
-    except requests.HTTPError:
-        pass
-
     finally:
-        remove_comic(path_to_photo)
+        path_to_photo.unlink()
 
 
 if __name__ == '__main__':
