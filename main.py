@@ -180,14 +180,7 @@ def post_comic_on_wall(vk_token,
                photo_description)
 
 
-def main():
-
-    load_dotenv()
-    photo_path = os.getenv("PHOTO_PATH", default="./photos")
-    group_id = os.getenv("VK_GROUP_ID")
-    vk_token = os.getenv("VK_TOKEN")
-    vk_api_version = os.getenv("VK_API_VERSION", default=5.131)
-    Path(photo_path).mkdir(parents=True, exist_ok=True)
+def download_random_comic(photo_path):
 
     last_comic_id = get_xkcd_last_comic_id()
     comic_number = randint(1, last_comic_id)
@@ -200,6 +193,20 @@ def main():
     file_name = get_filename_from_photo_link(photo_link)
     path_to_photo = Path(photo_path, file_name)
     download_comic(photo_link, path_to_photo)
+
+    return path_to_photo, photo_title, photo_description
+
+
+def main():
+
+    load_dotenv()
+    photo_path = os.getenv("PHOTO_PATH", default="./photos")
+    group_id = os.getenv("VK_GROUP_ID")
+    vk_token = os.getenv("VK_TOKEN")
+    vk_api_version = os.getenv("VK_API_VERSION", default=5.131)
+    Path(photo_path).mkdir(parents=True, exist_ok=True)
+
+    path_to_photo, photo_title, photo_description = download_random_comic(photo_path)
 
     try:
         post_comic_on_wall(vk_token,
