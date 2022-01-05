@@ -45,7 +45,8 @@ def get_filename_from_photo_link(photo_link):
 
     file_name_index = 1
     path_to_file = urlparse(photo_link).path
-    file_name = os.path.split(path_to_file)[file_name_index]
+    file_name = urllib.parse.unquote(path_to_file)
+    file_name = os.path.split(file_name)[file_name_index]
 
     return file_name
 
