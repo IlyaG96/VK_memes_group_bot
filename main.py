@@ -31,12 +31,6 @@ def get_xkcd_last_comic_id():
     return last_comic_id
 
 
-def chose_random_number(last_comic_id):
-    comic_number = randint(1, last_comic_id)
-
-    return comic_number
-
-
 def fetch_comic_description(comic_number):
 
     url = f"https://xkcd.com/{comic_number}/info.0.json"
@@ -195,7 +189,7 @@ def main():
     Path(photo_path).mkdir(parents=True, exist_ok=True)
 
     last_comic_id = get_xkcd_last_comic_id()
-    comic_number = chose_random_number(last_comic_id)
+    comic_number = randint(1, last_comic_id)
     comic_description = fetch_comic_description(comic_number)
 
     photo_title = comic_description["safe_title"]
