@@ -49,9 +49,9 @@ def fetch_comic_description(comic_number):
 
 def get_filename_from_photo_link(photo_link):
 
-    t = urlparse(photo_link).path
-    z = urllib.parse.unquote(t)
-    file_name = os.path.split(z)[1]
+    file_name_index = 1
+    path_to_file = urlparse(photo_link).path
+    file_name = os.path.split(path_to_file)[file_name_index]
 
     return file_name
 
@@ -197,9 +197,11 @@ def main():
     last_comic_id = get_xkcd_last_comic_id()
     comic_number = chose_random_number(last_comic_id)
     comic_description = fetch_comic_description(comic_number)
+
     photo_title = comic_description["safe_title"]
     photo_description = comic_description["alt"]
     photo_link = comic_description["img"]
+
     file_name = get_filename_from_photo_link(photo_link)
     path_to_photo = Path(photo_path, file_name)
     download_comic(photo_link, path_to_photo)
