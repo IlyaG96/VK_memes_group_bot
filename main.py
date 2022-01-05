@@ -13,9 +13,9 @@ class VkException(Exception):
 
 def check_for_errors(response):
 
-    if response.get('error'):
-        error_code = response['error']['error_code']
-        error_msg = response['error']['error_msg']
+    if response.get("error"):
+        error_code = response["error"]["error_code"]
+        error_msg = response["error"]["error_msg"]
         msg = f"Ошибка! Код ошибки: '{error_code}', текст ошибки: '{error_msg}'"
 
         raise VkException(msg)
@@ -211,5 +211,5 @@ def main():
         path_to_photo.unlink()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
